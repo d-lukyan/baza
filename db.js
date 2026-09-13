@@ -6,11 +6,11 @@ const pool = new Pool({
 
 pool.connect((err, client, release) => {
   if (err) {
-    return console.error('PostgreSQL connection error');
+    return console.error('[!] ERROR! PostgreSQL connection: ', err);
   }
-  console.log('Successful connection to PostgreSQL');
+  console.log('PostgreSQL connected successfully');
   release();
-})
+});
 
 module.exports = {
   query: (text, params) => pool.query(text, params),
