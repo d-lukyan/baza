@@ -790,5 +790,5 @@ app.post('/product/stock', wafCheck, async (req, res) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log('');
-  console.log(`SERVER is running on http://localhost:${PORT} successfully`);
+  console.log(`SERVER is running on http://127.0.0.1:${PORT} successfully`);
 });

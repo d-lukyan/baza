@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пример длинной страницы со скроллингом</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #2c3e50;
+            padding: 15px 0;
+            text-align: center;
+            z-index: 1000;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        nav a:hover {
+            color: #1abc9c;
+        }
+        section {
+            min-height: 100vh;
+            padding: 100px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        #home { background-color: #f5f6fa; }
+        #about { background-color: #dcdde1; }
+        #services { background-color: #f5f6fa; }
+        #portfolio { background-color: #dcdde1; }
+        #contact { background-color: #f5f6fa; }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        p {
+            max-width: 600px;
+            font-size: 1.1rem;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#home">Главная</a>
+        <a href="#about">О нас</a>
+        <a href="#services">Услуги</a>
+        <a href="#portfolio">Портфолио</a>
+        <a href="#contact">Контакты</a>
+    </nav>
+
+    <section id="home">
+        <h1>Главная секция</h1>
+        <p>Добро пожаловать на демонстрационную страницу. Каждая секция занимает как минимум 100% высоты экрана (100vh), обеспечивая скроллинг на несколько страниц вниз. Используйте навигацию выше для быстрого перемещения.</p>
+    </section>
+
+    <section id="about">
+        <h1>О нас</h1>
+        <p>Здесь может быть текст о вашей компании, проекте или личной истории. Плавный скроллинг настроен с помощью стандартного CSS свойства html { scroll-behavior: smooth; }.</p>
+    </section>
+
+    <section id="services">
+        <h1>Наши услуги</h1>
+        <p>В этой секции обычно описывают предоставляемые услуги или функции продукта. Контент выровнен по центру с помощью Flexbox.</p>
+    </section>
+
+    <section id="portfolio">
+        <h1>Портфолио</h1>
+        <p>Примеры выполненных работ, галерея изображений или кейсы клиентов. Достаточно места для демонстрации ваших лучших проектов.</p>
+    </section>
+
+    <section id="contact">
+        <h1>Контакты</h1>
+        <p>Форма обратной связи, карта проезда, email или номер телефона. Это финальная секция на нашей длинной странице.</p>
+    </section>
+
+</body>
+</html>

@@ -20,8 +20,8 @@ strict data validation, session protection, and an architecture resistant to com
 
 1. **Clone the repository:**
   ```bash
-  git clone [https://github.com/Dima-URL/Baza.git](https://github.com/Dima-URL/Baza.git)
-  cd Baza
+  git clone https://github.com/d-lukyan/baza.git
+  cd baza
   ```
 2. **Install dependencies:**
   ```bash
@@ -31,13 +31,13 @@ strict data validation, session protection, and an architecture resistant to com
 3. **Set up environment variables:**
 Create a .env file in the root of your project based on .env.example and add your keys:
   ```
-  PORT=3000
-  SESSION_SECRET='your_random_long_secret_here'
-  DB_PATH='./database.db'
+PORT=3000
+SESSION_SECRET=session_secret
+DATABASE_URL=postgresql://username:password@127.0.0.1:3000/baza_db
   ```
 4. **Start the server:**
-  ```js
-  node server.js
+  ```bash
+npm run dev
   ```
   
 
