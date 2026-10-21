@@ -1,3 +1,20 @@
+-- 1. Таблица пользователей (родительская)
+CREATE TABLE IF NOT EXISTS public.users
+(
+    user_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    username text COLLATE pg_catalog."default" NOT NULL,
+    email text COLLATE pg_catalog."default" NOT NULL,
+    password text COLLATE pg_catalog."default" NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    role text COLLATE pg_catalog."default" DEFAULT 'user'::text,
+    bio text COLLATE pg_catalog."default",
+    CONSTRAINT users_pkey PRIMARY KEY (user_id),
+    CONSTRAINT users_email_key UNIQUE (email),
+    CONSTRAINT users_username_key UNIQUE (username),
+    CONSTRAINT users_role_check CHECK (role = ANY (ARRAY['user'::text, 'admin'::text]))
+);
+
+-- 2. Остальные таблицы
 CREATE TABLE IF NOT EXISTS public.avatars
 (
     avatar_id serial NOT NULL,
@@ -6,7 +23,7 @@ CREATE TABLE IF NOT EXISTS public.avatars
     gender character varying(50) COLLATE pg_catalog."default" NOT NULL,
     is_premium boolean DEFAULT false,
     CONSTRAINT avatars_pkey PRIMARY KEY (avatar_id)
-)
+);
 
 CREATE TABLE IF NOT EXISTS public.feed_posts
 (
@@ -15,7 +32,7 @@ CREATE TABLE IF NOT EXISTS public.feed_posts
     message text COLLATE pg_catalog."default" NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
     CONSTRAINT feed_posts_pkey PRIMARY KEY (post_id)
-)
+);
 
 CREATE TABLE IF NOT EXISTS public.messages
 (
@@ -34,7 +51,7 @@ CREATE TABLE IF NOT EXISTS public.messages
         REFERENCES public.users (user_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
-)
+);
 
 CREATE TABLE IF NOT EXISTS public.password_resets
 (
@@ -48,30 +65,16 @@ CREATE TABLE IF NOT EXISTS public.password_resets
         REFERENCES public.users (user_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
-)
+);
 
 CREATE TABLE IF NOT EXISTS public.store_stock
 (
     product_id integer,
     store_id integer,
     units integer
-)
+);
 
-CREATE TABLE IF NOT EXISTS public.users
-(
-    user_id uuid NOT NULL DEFAULT gen_random_uuid(),
-    username text COLLATE pg_catalog."default" NOT NULL,
-    email text COLLATE pg_catalog."default" NOT NULL,
-    password text COLLATE pg_catalog."default" NOT NULL,
-    created_at timestamp with time zone DEFAULT now(),
-    role text COLLATE pg_catalog."default" DEFAULT 'user'::text,
-    bio text COLLATE pg_catalog."default",
-    CONSTRAINT users_pkey PRIMARY KEY (user_id),
-    CONSTRAINT users_email_key UNIQUE (email),
-    CONSTRAINT users_username_key UNIQUE (username),
-    CONSTRAINT users_role_check CHECK (role = ANY (ARRAY['user'::text, 'admin'::text]))
-)
-
-INSERT INTO users (username, password) 
-VALUES ('admin', 'password') 
+-- 3. Вставка администратора в самом конце
+INSERT INTO users (username, email, password, role) 
+VALUES ('admin_1', 'admin_1@baza.xyz', '$2b$10$TP0NGPiAN2eaaAALxqOW8evYh8YVXpZgbwMt1fW3s1SnyJ3KZpULK', 'admin') 
 ON CONFLICT (username) DO NOTHING;

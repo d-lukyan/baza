@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://admin_baza:3AX-pZbz_Yy_3-e9k2-rV9VS3-P_JZpsT-WM_b@localhost:5432/baza_db'
+  connectionString: process.env.DATABASE_URL || 'postgresql://admin_1:p-SSw0RD@postgres_db:5432/baza_db'
 });
 
 pool.connect((err, client, release) => {
