@@ -1,17 +1,45 @@
-version: '3.8'
-
 services:
-  postgres_db:
-    image: postgres:16-alpine
-    container_name: my_postgres_container
+  web:
+    build: .
+    container_name: baza_web_app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: mydatabase
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_HOST=postgres_db
+      - DB_USER=admin_1
+      - DB_PASS=p-SSw0RD
+      - DB_NAME=baza_db
+      - DB_PORT=5432
+    env_file:
+      - .env
+    depends_on:
+      postgres_db:
+        condition: service_healthy # Ждем, пока Postgres полностью запустится
+    restart: unless-stopped
+
+  postgres_db:
+    image: postgres:16
+    container_name: baza_postgres_container
+    environment:
+      POSTGRES_USER: admin_1
+      POSTGRES_PASSWORD: p-SSw0RD
+      POSTGRES_DB: baza_db
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d # Автоматически выполнит schema.sql при первом старте
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_1 -d baza_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
 
 volumes:
   pgdata:

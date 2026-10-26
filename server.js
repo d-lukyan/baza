@@ -6,7 +6,7 @@ const session = require('express-session');
 const db = require('./db');
 const bcrypt = require('bcryptjs');
 const PORT = process.env.PORT || 3000;
-const { validation } = require('./utils-server/utils-server');
+const { validation, escapeHTML } = require('./utils-server/utils-server');
 const { Server } = require('socket.io');
 const http = require('http');
 const server = http.createServer(app);
@@ -16,13 +16,14 @@ const middleware = require('./middleware.js');
 const fs = require('fs');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
+const { XMLParser } = require('fast-xml-parser');
 
 const AUTH_ERROR_MSG = 'Invalid email or password.';
 const SERVER_ERROR_MSG = 'A server error occurred. Please try again later.';
 const USER_NOT_FOUND = 'User not found';
 
 app.use(express.json());
-
+app.use(express.text({ type: 'application/xml' }));
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: true,
@@ -34,7 +35,7 @@ app.use(session({
   }
 }));
 
-app.use(express.static("./public"));
+app.use(express.static('./public'));
 
 const adminRoute = require('./admin-routes/admin-routes.js');
 const { type } = require('os');
@@ -57,6 +58,33 @@ io.on('connection', (socket) => {
     console.log("User disconnected");
   });
 });
+
+function formattedDate() {
+  const now = new Date();
+
+  const formater = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Kyiv',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+
+  return formater.format(now).replace('T', ' ');
+}
+
+function wafCheck(req, res, next) {
+    const rawXml = req.body || '';
+    const blackList = /UNION|SELECT|FROM/i;
+
+    if (blackList.test(rawXml)) {
+        return res.status(403).send('<h1>403 Forbidden: WAF Flagged Potential Attack</h1>');
+    }
+    next();
+}
 
 app.post('/register', async (req, res) => {
   let { username, email, password } = req.body;
@@ -752,6 +780,60 @@ app.get('/api/avatars', async (req, res) => {
   }
 });
 
+app.post('/product/stock', wafCheck, async (req, res) => {
+  try {
+    const parser = new XMLParser({ htmlEntities: true });
+    const jsonObj = parser.parse(req.body);
+
+    const storeId = jsonObj.stockCheck.storeId;
+    const productId = jsonObj.stockCheck.productId;
+
+    const query = `
+      SELECT units FROM store_stock
+      WHERE product_id = ${productId} AND store_id = ${storeId}
+    `;
+    const result = await db.query(query, [productId, storeId]);
+
+    if (!result.rows || result.rows.length === 0) {
+        return res.send('<response><units>0</units></response>');
+    }
+    const firstCell = Object.values(result.rows[0])[0];
+    res.send(`<response><units>${firstCell}</units></response>`);
+  } catch (err) {
+      console.error('[!] ERROR! "/product/stock":', err.message);
+      res.status(500).send('<response><error>Internal Error</error></response>');
+  }
+});
+
+app.get('/publish', (req, res) => {
+  const { query } = req.query;
+
+  const cleanQuery = escapeHTML(query || '');
+
+  return res.send(`
+    <!DOCTYPE html>
+    <html>
+      <body>
+        <form action="/search" method="GET">
+          <input
+            type="text"
+            name="query"
+            value=""
+        >
+
+        <button type="submit">Search</button>
+      </form>
+      <script>
+        let i;
+        i = '${cleanQuery}';
+        console.log('Hello World!');
+      </script>
+      </body>
+    </html>
+  `)
+})
+
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`[!] SERVER is running on http://localhost:${PORT}`);
+  console.log('');
+  console.log(`[${formattedDate()}] [INFO] SERVER is running on http://127.0.0.1:${PORT}`);
 });

@@ -5,4 +5,4 @@ chats/
 # PostgreSQL local storage & data volumes
 postgres_data/
 pgdata/
-*.sqlite
+
