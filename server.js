@@ -6,7 +6,7 @@ const session = require('express-session');
 const db = require('./db');
 const bcrypt = require('bcryptjs');
 const PORT = process.env.PORT || 3000;
-const { validation } = require('./utils-server/utils-server');
+const { validation, escapeHTML } = require('./utils-server/utils-server');
 const { Server } = require('socket.io');
 const http = require('http');
 const server = http.createServer(app);
@@ -58,6 +58,23 @@ io.on('connection', (socket) => {
     console.log("User disconnected");
   });
 });
+
+function formattedDate() {
+  const now = new Date();
+
+  const formater = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Kyiv',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+
+  return formater.format(now).replace('T', ' ');
+}
 
 function wafCheck(req, res, next) {
     const rawXml = req.body || '';
@@ -788,7 +805,35 @@ app.post('/product/stock', wafCheck, async (req, res) => {
   }
 });
 
+app.get('/publish', (req, res) => {
+  const { query } = req.query;
+
+  const cleanQuery = escapeHTML(query || '');
+
+  return res.send(`
+    <!DOCTYPE html>
+    <html>
+      <body>
+        <form action="/search" method="GET">
+          <input
+            type="text"
+            name="query"
+            value=""
+        >
+
+        <button type="submit">Search</button>
+      </form>
+      <script>
+        let i;
+        i = '${cleanQuery}';
+        console.log('Hello World!');
+      </script>
+      </body>
+    </html>
+  `)
+})
+
 server.listen(PORT, '0.0.0.0', () => {
   console.log('');
-  console.log(`SERVER is running on http://127.0.0.1:${PORT} successfully`);
+  console.log(`[${formattedDate()}] [INFO] SERVER is running on http://127.0.0.1:${PORT}`);
 });
